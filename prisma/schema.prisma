@@ -17,7 +17,7 @@ model Player {
   id        Int       @id @default(autoincrement())
   name      String?   @default("Anonymous")
   start     DateTime  @default(now())
-  stop      DateTime? @updatedAt
+  stop      DateTime?
   time      Int?
   man       Boolean   @default(false)
   bull      Boolean   @default(false)

@@ -2,17 +2,27 @@
 
 const { Router } = require('express');
 const playerRouter = Router();
-const { startNewGame, stopGame } = require('../controllers/playersControllers');
+const {
+  startNewGame,
+  stopGame,
+  getLeaderboard,
+  getGraystates,
+  updateGraystates,
+} = require('../controllers/playersControllers');
 
 // POST /players
 playerRouter.post('/', startNewGame);
 
-// PUT /players/:id
-playerRouter.put('/:playerId', stopGame);
+// POST /players/:id/stop
+playerRouter.post('/:playerId/stop', stopGame);
 
 // GET /players
-playerRouter.get('/', (req, res, next) => {
-  res.status(200).json({ name: 'Jeff', time: 230 });
-});
+playerRouter.get('/', getLeaderboard);
+
+// GET /players/:playerId/graystates
+playerRouter.get('/:playerId/graystates', getGraystates);
+
+// PUT /players/:playerId/graystates
+playerRouter.put('/:playerId/graystates', updateGraystates);
 
 module.exports = playerRouter;
