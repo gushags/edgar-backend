@@ -18,7 +18,7 @@ model Player {
   name      String?   @default("Anonymous")
   start     DateTime  @default(now())
   stop      DateTime? @updatedAt
-  time      Int
+  time      Int?
   man       Boolean   @default(false)
   bull      Boolean   @default(false)
   duck      Boolean   @default(false)
