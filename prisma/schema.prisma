@@ -14,20 +14,30 @@ datasource db {
 }
 
 model Player {
-  id        Int       @id @default(autoincrement())
-  name      String?   @default("Anonymous")
-  start     DateTime  @default(now())
-  stop      DateTime?
-  time      Int?
-  man       Boolean   @default(false)
-  bull      Boolean   @default(false)
-  duck      Boolean   @default(false)
-  gnome     Boolean   @default(false)
-  poe       Boolean   @default(false)
+  id            Int             @id @default(autoincrement())
+  name          String?         @default("Anonymous")
+  start         DateTime        @default(now())
+  stop          DateTime?
+  time          Int?
+
+  foundTargets  FoundTarget[]
 }
 
-model Location {
-  id        Int       @id @default(autoincrement())
-  xCoord    Int
-  yCoord    Int
+model FoundTarget {
+  id            Int             @id @default(autoincrement())
+  sessionId     Int
+  targetKey     String
+  foundAt       DateTime        @default(now())
+
+  session       Player          @relation(fields: [sessionId], references: [id])
+
+  @@unique([sessionId, targetKey])
+}
+
+model Target {
+  id        Int                 @id @default(autoincrement())
+  key       String
+  xCoord    Float
+  yCoord    Float
+  radius    Float
 }

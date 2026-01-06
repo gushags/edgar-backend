@@ -38,43 +38,113 @@ async function getLeaderboard(req, res, next) {
   res.json({ data: players, message: 'Top 10 leaders retrieved' });
 }
 
-async function getGraystates(req, res, next) {
-  const { playerId } = req.params;
-  const grayStates = await prisma.player.findUnique({
-    where: { id: parseInt(playerId) },
-    select: {
-      man: true,
-      bull: true,
-      duck: true,
-      gnome: true,
-      poe: true,
+// async function getGraystates(req, res, next) {
+//   const { playerId } = req.params;
+//   const grayStates = await prisma.player.findUnique({
+//     where: { id: parseInt(playerId) },
+//     select: {
+//       man: true,
+//       bull: true,
+//       duck: true,
+//       gnome: true,
+//       poe: true,
+//     },
+//   });
+//   res.json({ data: grayStates, message: 'GrayStates retrieved' });
+// }
+
+// async function updateGraystates(req, res, next) {
+//   const { playerId } = req.params;
+//   const { id } = req.body;
+//   const updateData = {};
+//   if (id == 'man') updateData.man = true;
+//   if (id == 'bull') updateData.bull = true;
+//   if (id == 'duck') updateData.duck = true;
+//   if (id == 'gnome') updateData.gnome = true;
+//   if (id == 'poe') updateData.poe = true;
+
+//   const grayStates = await prisma.player.update({
+//     where: { id: parseInt(playerId) },
+//     data: updateData,
+//   });
+
+//   res.json({ data: grayStates, message: 'GrayStates updated' });
+// }
+
+async function submitGuess(req, res) {
+  const playerId = parseInt(req.params.playerId);
+  const { targetKey, clickX, clickY } = req.body;
+
+  // Get target data
+  const target = await prisma.target.findUnique({
+    where: { key: targetKey },
+  });
+
+  if (!target) {
+    return res.status(400).json({ error: 'Invalid target' });
+  }
+
+  // Validate position
+  const dx = clickX - target.x;
+  const dy = clickY - target.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > target.radius) {
+    return res.json({ success: false });
+  }
+
+  // Record found target
+  await prisma.foundTarget.upsert({
+    where: {
+      playerId_targetId: {
+        playerId,
+        targetId: target.id,
+      },
+    },
+    update: {},
+    create: {
+      playerId,
+      targetId: target.id,
     },
   });
-  res.json({ data: grayStates, message: 'GrayStates retrieved' });
-}
 
-async function updateGraystates(req, res, next) {
-  const { playerId } = req.params;
-  const { id } = req.body;
-  const updateData = {};
-  if (id == 'man') updateData.man = true;
-  if (id == 'bull') updateData.bull = true;
-  if (id == 'duck') updateData.duck = true;
-  if (id == 'gnome') updateData.gnome = true;
-  if (id == 'poe') updateData.poe = true;
-
-  const grayStates = await prisma.player.update({
-    where: { id: parseInt(playerId) },
-    data: updateData,
+  // Check completion
+  const totalTargets = await prisma.target.count();
+  const foundCount = await prisma.foundTarget.count({
+    where: { playerId },
   });
 
-  res.json({ data: grayStates, message: 'GrayStates updated' });
+  let gameComplete = false;
+
+  if (foundCount === totalTargets) {
+    gameComplete = true;
+
+    const player = await prisma.player.findUnique({
+      where: { id: playerId },
+      select: { start: true },
+    });
+
+    const stop = new Date();
+    const time = Math.round((stop.getTime() - player.start.getTime()) / 1000);
+
+    await prisma.player.update({
+      where: { id: playerId },
+      data: { stop, time },
+    });
+  }
+
+  res.json({
+    success: true,
+    foundTarget: target.key,
+    gameComplete,
+  });
 }
 
 module.exports = {
   startNewGame,
   stopGame,
   getLeaderboard,
-  getGraystates,
-  updateGraystates,
+  submitGuess,
+  // getGraystates,
+  // updateGraystates,
 };
