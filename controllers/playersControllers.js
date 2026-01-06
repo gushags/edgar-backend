@@ -38,42 +38,9 @@ async function getLeaderboard(req, res, next) {
   res.json({ data: players, message: 'Top 10 leaders retrieved' });
 }
 
-// async function getGraystates(req, res, next) {
-//   const { playerId } = req.params;
-//   const grayStates = await prisma.player.findUnique({
-//     where: { id: parseInt(playerId) },
-//     select: {
-//       man: true,
-//       bull: true,
-//       duck: true,
-//       gnome: true,
-//       poe: true,
-//     },
-//   });
-//   res.json({ data: grayStates, message: 'GrayStates retrieved' });
-// }
-
-// async function updateGraystates(req, res, next) {
-//   const { playerId } = req.params;
-//   const { id } = req.body;
-//   const updateData = {};
-//   if (id == 'man') updateData.man = true;
-//   if (id == 'bull') updateData.bull = true;
-//   if (id == 'duck') updateData.duck = true;
-//   if (id == 'gnome') updateData.gnome = true;
-//   if (id == 'poe') updateData.poe = true;
-
-//   const grayStates = await prisma.player.update({
-//     where: { id: parseInt(playerId) },
-//     data: updateData,
-//   });
-
-//   res.json({ data: grayStates, message: 'GrayStates updated' });
-// }
-
 async function submitGuess(req, res) {
   const playerId = parseInt(req.params.playerId);
-  const { targetKey, clickX, clickY } = req.body;
+  const { targetKey, clickX, clickY, dimension } = req.body;
 
   // Get target data
   const target = await prisma.target.findUnique({
@@ -85,10 +52,16 @@ async function submitGuess(req, res) {
   }
 
   // Validate position
-  const dx = clickX - target.x;
-  const dy = clickY - target.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
+  console.log('clickX: ', clickX);
+  console.log('targetX: ', target.xCoord);
+  console.log('clickY: ', clickY);
+  console.log('targetY: ', target.yCoord);
 
+  const distanceSquared =
+    (clickX * dimension.width - target.xCoord * dimension.width) ** 2 +
+    (clickY * dimension.height - target.yCoord * dimension.height) ** 2;
+
+  const distance = Math.sqrt(distanceSquared);
   if (distance > target.radius) {
     return res.json({ success: false });
   }
@@ -145,6 +118,4 @@ module.exports = {
   stopGame,
   getLeaderboard,
   submitGuess,
-  // getGraystates,
-  // updateGraystates,
 };

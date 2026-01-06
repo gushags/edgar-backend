@@ -24,20 +24,23 @@ model Player {
 }
 
 model FoundTarget {
-  id            Int             @id @default(autoincrement())
-  sessionId     Int
-  targetKey     String
-  foundAt       DateTime        @default(now())
+  id        Int                 @id @default(autoincrement())
+  playerId  Int
+  targetId  Int
 
-  session       Player          @relation(fields: [sessionId], references: [id])
+  player    Player                 @relation(fields: [playerId], references: [id])
+  target    Target                 @relation(fields: [targetId], references: [id])
 
-  @@unique([sessionId, targetKey])
+  @@unique([playerId, targetId])
 }
+
 
 model Target {
   id        Int                 @id @default(autoincrement())
-  key       String
+  key       String              @unique
   xCoord    Float
   yCoord    Float
   radius    Float
+
+  foundBy   FoundTarget[]
 }
