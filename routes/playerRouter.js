@@ -7,6 +7,7 @@ const {
   stopGame,
   getLeaderboard,
   submitGuess,
+  updateName,
 } = require('../controllers/playersControllers');
 
 // POST /players
@@ -20,5 +21,8 @@ playerRouter.post('/:playerId/guess', submitGuess);
 
 // GET /players
 playerRouter.get('/', getLeaderboard);
+
+// PUT players/:playerId/name
+playerRouter.put('/:playerId/name', updateName);
 
 module.exports = playerRouter;

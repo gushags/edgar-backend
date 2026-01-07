@@ -16,7 +16,7 @@ async function stopGame(req, res, next) {
   });
 
   const stop = new Date();
-  const time = Math.round((stop.getTime() - player.start.getTime()) / 1000);
+  const time = Math.floor((stop.getTime() - player.start.getTime()) / 1000);
 
   const updatedPlayer = await prisma.player.update({
     where: { id: parseInt(playerId) },
@@ -52,11 +52,6 @@ async function submitGuess(req, res) {
   }
 
   // Validate position
-  console.log('clickX: ', clickX);
-  console.log('targetX: ', target.xCoord);
-  console.log('clickY: ', clickY);
-  console.log('targetY: ', target.yCoord);
-
   const distanceSquared =
     (clickX * dimension.width - target.xCoord * dimension.width) ** 2 +
     (clickY * dimension.height - target.yCoord * dimension.height) ** 2;
@@ -113,9 +108,20 @@ async function submitGuess(req, res) {
   });
 }
 
+async function updateName(req, res) {
+  const { playerId } = req.params;
+  const { name } = req.body;
+  const updatedPlayer = await prisma.player.update({
+    where: { id: parseInt(playerId) },
+    data: { name },
+  });
+  res.json({ data: updatedPlayer, message: 'Successfully updated name.' });
+}
+
 module.exports = {
   startNewGame,
   stopGame,
   getLeaderboard,
   submitGuess,
+  updateName,
 };
