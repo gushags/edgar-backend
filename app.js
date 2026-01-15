@@ -17,14 +17,12 @@ app.use(cors());
  *  ------ ROUTERS ------
  */
 
-const locationRouter = require('./routes/locationRouter');
 const playerRouter = require('./routes/playerRouter');
 
 /**
  * ------ ROUTES ------
  */
 
-app.use('/location', locationRouter);
 app.use('/players', playerRouter);
 
 app.listen(process.env.PORT, (error) => {
