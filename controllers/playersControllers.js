@@ -1,6 +1,6 @@
 // playersControllers.js
 
-const { prisma } = require('../lib/prisma');
+const { prisma } = require('../lib/prisma.js');
 
 async function startNewGame(req, res, next) {
   const player = await prisma.player.create({ data: { name: 'Anonymous' } });
